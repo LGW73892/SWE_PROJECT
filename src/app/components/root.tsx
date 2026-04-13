@@ -1,5 +1,6 @@
 import { Outlet, Link, useLocation } from "react-router";
-import { Crown, Calendar, CheckSquare, Home } from "lucide-react";
+import { Calendar, CheckSquare, Crown, Home } from "lucide-react";
+import prepKingLogo from "../../assets/prep-king-logo.svg";
 
 export function Root() {
   const location = useLocation();
@@ -18,9 +19,11 @@ export function Root() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-orange-400 rounded-lg flex items-center justify-center">
-                <Crown className="w-5 h-5 text-white" />
-              </div>
+              <img
+                src={prepKingLogo}
+                alt="Prep King logo"
+                className="w-8 h-8 rounded-lg"
+              />
               <span className="text-xl font-semibold">Prep King</span>
             </Link>
             
