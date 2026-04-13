@@ -21,10 +21,10 @@ export function Root() {
             <Link to="/" className="flex items-center gap-2">
               <img
                 src={prepKingLogo}
-                alt="Prep King logo"
+                alt="Silicon Defense logo"
                 className="w-8 h-8 rounded-lg"
               />
-              <span className="text-xl font-semibold">Prep King</span>
+              <span className="text-xl font-semibold">Silicon Defense</span>
             </Link>
             
             <nav className="hidden md:flex gap-6">
