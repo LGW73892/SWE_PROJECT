@@ -15,16 +15,23 @@ export function Root() {
   return (
     <div className="size-full flex flex-col">
       {/* Header */}
-      <header className="border-b bg-white">
+      <header className="-b bordborderer-emerald-900/15 bg-[#fffaf0]/95 backdrop-blur supports-[backdrop-filter]:bg-[#fffaf0]/80 shadow-[0_2px_24px_rgba(31,77,58,0.06)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-3">
               <img
                 src={prepKingLogo}
                 alt="Silicon Defense logo"
-                className="w-8 h-8 rounded-lg"
+                className="w-9 h-9 rounded-xl shadow-sm ring-1 ring-emerald-900/10"
               />
-              <span className="text-xl font-semibold">Silicon Defense</span>
+              <div className="leading-tight">
+                <span className="block text-xl font-semibold tracking-tight text-stone-900">
+                  Silicon Defense
+                </span>
+                <span className="block text-[11px] uppercase tracking-[0.3em] text-emerald-800/70">
+                  Chess-powered prep
+                </span>
+              </div>
             </Link>
             
             <nav className="hidden md:flex gap-6">
@@ -37,8 +44,8 @@ export function Root() {
                     to={item.path}
                     className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
                       isActive
-                        ? "bg-purple-50 text-purple-600"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                        ? "bg-emerald-900/10 text-emerald-900"
+                        : "text-stone-600 hover:text-stone-900 hover:bg-amber-50"
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -52,12 +59,12 @@ export function Root() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-gray-50">
+      <main className="flex-1 overflow-auto bg-transparent">
         <Outlet />
       </main>
 
       {/* Mobile Navigation */}
-      <nav className="md:hidden border-t bg-white">
+      <nav className="md:hidden border-t border-emerald-900/15 bg-[#fffaf0]/95 backdrop-blur">
         <div className="flex justify-around">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -67,7 +74,7 @@ export function Root() {
                 key={item.path}
                 to={item.path}
                 className={`flex flex-col items-center gap-1 py-3 px-4 flex-1 ${
-                  isActive ? "text-purple-600" : "text-gray-600"
+                  isActive ? "text-emerald-900" : "text-stone-600"
                 }`}
               >
                 <Icon className="w-5 h-5" />

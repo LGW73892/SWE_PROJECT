@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { ArrowRight, Briefcase, Code, Users, TrendingUp } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  Castle,
+  Code,
+  Crown,
+  Shield,
+  Target,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 
 const interviewTypes = [
   {
@@ -55,21 +65,62 @@ export function Home() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Checkmate Your Interview
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Get a personalized preparation plan, structured schedule, and curated
-          practice questions tailored to your interview type
-        </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+      <div className="relative overflow-hidden rounded-[2rem] border border-emerald-900/12 bg-[#fffaf0]/90 shadow-[0_24px_80px_rgba(31,77,58,0.08)]">
+        <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(45deg,#1f4d3a_25%,transparent_25%),linear-gradient(-45deg,#1f4d3a_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#1f4d3a_75%),linear-gradient(-45deg,transparent_75%,#1f4d3a_75%)] [background-size:48px_48px] [background-position:0_0,0_24px,24px_-24px,-24px_0]" />
+        <div className="relative px-6 py-10 sm:px-10 sm:py-14 lg:px-14 lg:py-16">
+          <div className="mb-8 flex flex-wrap items-center gap-3 text-sm uppercase tracking-[0.3em] text-emerald-900/70">
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-emerald-50 px-3 py-1 text-[11px] tracking-[0.35em] text-emerald-900">
+              <Castle className="h-3.5 w-3.5" />
+              Opening Prep
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-amber-900/10 bg-amber-50 px-3 py-1 text-[11px] tracking-[0.35em] text-stone-700">
+              <Crown className="h-3.5 w-3.5" />
+              Study Like a King
+            </span>
+          </div>
+
+          <div className="text-center mb-12">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-stone-900 mb-4">
+              Checkmate Your Interview
+            </h1>
+            <p className="text-lg sm:text-xl text-stone-600 max-w-2xl mx-auto">
+              Build a board-winning prep plan with opening moves, tactical
+              drills, and endgame practice tailored to your interview type.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3 mb-12">
+            {[
+              { icon: Shield, title: "Defend your strengths", text: "Spot weak squares before the interview does." },
+              { icon: Target, title: "Play with purpose", text: "Each session moves you closer to checkmate." },
+              { icon: Crown, title: "Finish like a king", text: "Arrive with a clear line from prep to offer." },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.title}
+                  className="rounded-2xl border border-emerald-900/10 bg-white/80 p-5 text-left shadow-sm"
+                >
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-900 text-[#fffaf0]">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="mb-1 text-base font-semibold text-stone-900">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-stone-600">{item.text}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Interview Type Selection */}
       <div className="mb-12">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-          Select Your Interview Type
+        <h2 className="text-2xl font-semibold text-stone-900 mb-6 flex items-center gap-2">
+          <Castle className="h-5 w-5 text-emerald-900" />
+          Choose Your Opening
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {interviewTypes.map((type) => {
@@ -79,33 +130,29 @@ export function Home() {
               <button
                 key={type.id}
                 onClick={() => setSelectedType(type.id)}
-                className={`p-6 rounded-lg border-2 text-left transition-all ${
+                className={`p-6 rounded-2xl border-2 text-left transition-all duration-200 shadow-sm ${
                   isSelected
-                    ? "border-purple-400 bg-purple-50"
-                    : "border-gray-200 bg-white hover:border-gray-300"
+                    ? "border-emerald-900 bg-emerald-50"
+                    : "border-emerald-900/10 bg-white/85 hover:border-emerald-900/25 hover:-translate-y-0.5"
                 }`}
               >
                 <div className="flex items-start gap-4">
                   <div
-                    className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                      isSelected
-                        ? "bg-purple-500"
-                        : "bg-purple-200"
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                      isSelected ? "bg-emerald-900" : "bg-amber-100"
                     }`}
                   >
                     <Icon
                       className={`w-6 h-6 ${
-                        isSelected
-                          ? "text-white"
-                          : "text-purple-400"
+                        isSelected ? "text-[#fffaf0]" : "text-emerald-900"
                       }`}
                     />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 mb-1">
+                    <h3 className="font-semibold text-stone-900 mb-1">
                       {type.name}
                     </h3>
-                    <p className="text-sm text-gray-600">{type.description}</p>
+                    <p className="text-sm text-stone-600">{type.description}</p>
                   </div>
                 </div>
               </button>
@@ -116,7 +163,8 @@ export function Home() {
 
       {/* Timeframe Selection */}
       <div className="mb-12">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+        <h2 className="text-2xl font-semibold text-stone-900 mb-6 flex items-center gap-2">
+          <Shield className="h-5 w-5 text-emerald-900" />
           How Much Time Do You Have?
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -126,16 +174,16 @@ export function Home() {
               <button
                 key={timeframe.id}
                 onClick={() => setSelectedTimeframe(timeframe.id)}
-                className={`p-6 rounded-lg border-2 text-center transition-all ${
+                className={`p-6 rounded-2xl border-2 text-center transition-all duration-200 shadow-sm ${
                   isSelected
-                    ? "border-purple-400 bg-purple-50"
-                    : "border-gray-200 bg-white hover:border-gray-300"
+                    ? "border-emerald-900 bg-emerald-50"
+                    : "border-emerald-900/10 bg-white/85 hover:border-emerald-900/25 hover:-translate-y-0.5"
                 }`}
               >
-                <div className="text-2xl font-bold text-gray-900 mb-1">
+                <div className="text-2xl font-bold text-stone-900 mb-1">
                   {timeframe.label}
                 </div>
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-stone-600">
                   {timeframe.days} days
                 </div>
               </button>
@@ -149,10 +197,10 @@ export function Home() {
         <button
           onClick={handleGetStarted}
           disabled={!selectedType || !selectedTimeframe}
-          className={`inline-flex items-center gap-2 px-8 py-4 rounded-lg text-lg font-semibold transition-all ${
+          className={`inline-flex items-center gap-2 px-8 py-4 rounded-full text-lg font-semibold transition-all shadow-sm ${
             selectedType && selectedTimeframe
-              ? "bg-purple-500 text-white hover:bg-purple-600"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              ? "bg-emerald-900 text-[#fffaf0] hover:bg-emerald-800"
+              : "bg-stone-300 text-stone-500 cursor-not-allowed"
           }`}
         >
           Generate My Plan
