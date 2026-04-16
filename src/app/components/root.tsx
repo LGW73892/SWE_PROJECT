@@ -1,9 +1,41 @@
-import { Outlet, Link, useLocation } from "react-router";
+import { Outlet, Link, useLocation, useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 import { Calendar, CheckSquare, Crown, Home } from "lucide-react";
 import prepKingLogo from "../../assets/prep-king-logo.svg";
+import { clearToken, getMyProfile, isAuthenticated } from "../lib/api";
 
 export function Root() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(isAuthenticated());
+  const [fullName, setFullName] = useState("");
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!isAuthenticated()) {
+        setIsLoggedIn(false);
+        setFullName("");
+        return;
+      }
+      try {
+        const profile = await getMyProfile();
+        setIsLoggedIn(true);
+        setFullName(profile.fullName || profile.email);
+      } catch {
+        setIsLoggedIn(false);
+        setFullName("");
+      }
+    };
+
+    void loadProfile();
+  }, [location.pathname]);
+
+  const handleLogout = () => {
+    clearToken();
+    setIsLoggedIn(false);
+    setFullName("");
+    navigate("/");
+  };
 
   const navItems = [
     { path: "/", icon: Home, label: "Home" },
@@ -33,7 +65,7 @@ export function Root() {
                 </span>
               </div>
             </Link>
-            
+
             <nav className="hidden md:flex gap-6">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -53,6 +85,21 @@ export function Root() {
                   </Link>
                 );
               })}
+              {isLoggedIn ? (
+                <button
+                  onClick={handleLogout}
+                  className="rounded-md bg-emerald-900 px-3 py-2 text-[#fffaf0] transition-colors hover:bg-emerald-800"
+                >
+                  Logout {fullName ? `(${fullName})` : ""}
+                </button>
+              ) : (
+                <Link
+                  to="/auth"
+                  className="rounded-md bg-amber-100 px-3 py-2 text-stone-800 transition-colors hover:bg-amber-200"
+                >
+                  Login / Sign Up
+                </Link>
+              )}
             </nav>
           </div>
         </div>

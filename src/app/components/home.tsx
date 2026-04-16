@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   ArrowRight,
   Briefcase,
@@ -11,6 +11,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import { generatePlan, isAuthenticated, updateMyProfile } from "../lib/api";
 
 const interviewTypes = [
   {
@@ -54,13 +55,53 @@ export function Home() {
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>("");
+  const [targetCompaniesInput, setTargetCompaniesInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleGetStarted = () => {
-    if (selectedType && selectedTimeframe) {
-      // Store selections in localStorage
-      localStorage.setItem("interviewType", selectedType);
-      localStorage.setItem("timeframe", selectedTimeframe);
+  const targetCompanies = targetCompaniesInput
+    .split(",")
+    .map((company) => company.trim())
+    .filter(Boolean);
+
+  const handleGetStarted = async () => {
+    if (!selectedType || !selectedTimeframe) {
+      setError("Please select interview type and timeframe.");
+      return;
+    }
+
+    if (!isAuthenticated()) {
+      setError("Please login or sign up first.");
+      navigate("/auth");
+      return;
+    }
+
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      await updateMyProfile("", targetCompanies);
+
+      await generatePlan({
+        interviewType: selectedType as
+          | "software"
+          | "product"
+          | "behavioral"
+          | "general",
+        timeframe: selectedTimeframe as
+          | "1week"
+          | "2weeks"
+          | "1month"
+          | "2months",
+        targetCompanies,
+      });
+
       navigate("/plan");
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Something went wrong";
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -92,9 +133,21 @@ export function Home() {
 
           <div className="grid gap-4 sm:grid-cols-3 mb-12">
             {[
-              { icon: Shield, title: "Defend your strengths", text: "Spot weak squares before the interview does." },
-              { icon: Target, title: "Play with purpose", text: "Each session moves you closer to checkmate." },
-              { icon: Crown, title: "Finish like a king", text: "Arrive with a clear line from prep to offer." },
+              {
+                icon: Shield,
+                title: "Defend your strengths",
+                text: "Spot weak squares before the interview does.",
+              },
+              {
+                icon: Target,
+                title: "Play with purpose",
+                text: "Each session moves you closer to checkmate.",
+              },
+              {
+                icon: Crown,
+                title: "Finish like a king",
+                text: "Arrive with a clear line from prep to offer.",
+              },
             ].map((item) => {
               const Icon = item.icon;
               return (
@@ -193,17 +246,59 @@ export function Home() {
       </div>
 
       {/* Get Started Button */}
+      <div className="mb-8 rounded-2xl border border-emerald-900/10 bg-white/85 p-6 shadow-sm">
+        <h2 className="mb-4 text-2xl font-semibold text-stone-900">
+          Company Targeting
+        </h2>
+        <p className="mb-4 text-sm text-stone-600">
+          Add company names to get a tailored plan and practice set.
+        </p>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-sm font-medium text-stone-700">
+              Target Companies (comma separated)
+            </label>
+            <input
+              value={targetCompaniesInput}
+              onChange={(e) => setTargetCompaniesInput(e.target.value)}
+              className="w-full rounded-lg border border-emerald-900/20 bg-white px-3 py-2"
+              placeholder="Google, Meta, Stripe"
+            />
+          </div>
+        </div>
+
+        {error && (
+          <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+
+        {!isAuthenticated() && (
+          <p className="mt-4 text-sm text-stone-700">
+            You are not logged in. Continue at{" "}
+            <Link
+              to="/auth"
+              className="font-semibold text-emerald-900 underline"
+            >
+              Login / Sign Up
+            </Link>{" "}
+            first.
+          </p>
+        )}
+      </div>
+
       <div className="text-center">
         <button
           onClick={handleGetStarted}
-          disabled={!selectedType || !selectedTimeframe}
+          disabled={!selectedType || !selectedTimeframe || isSubmitting}
           className={`inline-flex items-center gap-2 px-8 py-4 rounded-full text-lg font-semibold transition-all shadow-sm ${
-            selectedType && selectedTimeframe
+            selectedType && selectedTimeframe && !isSubmitting
               ? "bg-emerald-900 text-[#fffaf0] hover:bg-emerald-800"
               : "bg-stone-300 text-stone-500 cursor-not-allowed"
           }`}
         >
-          Generate My Plan
+          {isSubmitting ? "Generating..." : "Generate My Plan"}
           <ArrowRight className="w-5 h-5" />
         </button>
       </div>

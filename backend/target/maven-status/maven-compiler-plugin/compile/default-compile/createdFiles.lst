@@ -1,0 +1,3 @@
+com\silicondefense\backend\controller\PlanController.class
+com\silicondefense\backend\controller\PlanController$CompletionRequest.class
+com\silicondefense\backend\controller\PlanController$GeneratePlanRequest.class

@@ -1,206 +1,125 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { CheckCircle2, Circle, ArrowRight, BookOpen, Code, Users, Target } from "lucide-react";
+import {
+  CheckCircle2,
+  Circle,
+  ArrowRight,
+  BookOpen,
+  Code,
+  Users,
+  Target,
+} from "lucide-react";
+import {
+  getCurrentPlan,
+  isAuthenticated,
+  PlanData,
+  setPhaseCompleted,
+} from "../lib/api";
 
-interface PlanPhase {
-  id: string;
-  title: string;
-  description: string;
-  duration: string;
-  topics: string[];
-  icon: any;
-}
+const phaseIcons = [BookOpen, Code, Target, Users];
 
 export function Plan() {
-  const [interviewType, setInterviewType] = useState<string>("");
-  const [timeframe, setTimeframe] = useState<string>("");
-  const [completedPhases, setCompletedPhases] = useState<Set<string>>(new Set());
+  const [plan, setPlan] = useState<PlanData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const type = localStorage.getItem("interviewType") || "software";
-    const time = localStorage.getItem("timeframe") || "2weeks";
-    setInterviewType(type);
-    setTimeframe(time);
-    
-    const completed = localStorage.getItem("completedPhases");
-    if (completed) {
-      setCompletedPhases(new Set(JSON.parse(completed)));
-    }
+    const load = async () => {
+      if (!isAuthenticated()) {
+        setError("Please sign up or login first.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const currentPlan = await getCurrentPlan();
+        setPlan(currentPlan);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "Unable to load plan";
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void load();
   }, []);
 
-  const togglePhase = (phaseId: string) => {
-    const newCompleted = new Set(completedPhases);
-    if (newCompleted.has(phaseId)) {
-      newCompleted.delete(phaseId);
+  const togglePhase = async (phaseId: string) => {
+    if (!plan) {
+      return;
+    }
+
+    const completedSet = new Set(plan.completedPhases);
+    const currentlyCompleted = completedSet.has(phaseId);
+    const nextCompleted = !currentlyCompleted;
+
+    if (nextCompleted) {
+      completedSet.add(phaseId);
     } else {
-      newCompleted.add(phaseId);
+      completedSet.delete(phaseId);
     }
-    setCompletedPhases(newCompleted);
-    localStorage.setItem("completedPhases", JSON.stringify([...newCompleted]));
-  };
 
-  const getPlansForType = (type: string): PlanPhase[] => {
-    switch (type) {
-      case "software":
-        return [
-          {
-            id: "phase1",
-            title: "Foundation & Data Structures",
-            description: "Master core data structures and basic algorithms",
-            duration: "Week 1",
-            topics: ["Arrays & Strings", "Linked Lists", "Stacks & Queues", "Hash Tables", "Big O Notation"],
-            icon: BookOpen,
-          },
-          {
-            id: "phase2",
-            title: "Advanced Algorithms",
-            description: "Learn essential algorithmic patterns",
-            duration: "Week 2",
-            topics: ["Trees & Graphs", "Dynamic Programming", "Recursion", "Sorting & Searching", "Two Pointers"],
-            icon: Code,
-          },
-          {
-            id: "phase3",
-            title: "System Design",
-            description: "Understand scalable system architecture",
-            duration: "Week 3",
-            topics: ["Design Patterns", "Load Balancing", "Caching", "Database Design", "Microservices"],
-            icon: Target,
-          },
-          {
-            id: "phase4",
-            title: "Behavioral & Mock Interviews",
-            description: "Practice communication and problem-solving",
-            duration: "Week 4",
-            topics: ["STAR Method", "Leadership Stories", "Mock Coding", "Code Review", "Technical Communication"],
-            icon: Users,
-          },
-        ];
-      case "product":
-        return [
-          {
-            id: "phase1",
-            title: "Product Fundamentals",
-            description: "Core product management concepts",
-            duration: "Week 1",
-            topics: ["Product Lifecycle", "User Research", "Market Analysis", "Roadmapping", "Stakeholder Management"],
-            icon: BookOpen,
-          },
-          {
-            id: "phase2",
-            title: "Metrics & Analytics",
-            description: "Data-driven decision making",
-            duration: "Week 2",
-            topics: ["KPIs & Metrics", "A/B Testing", "User Analytics", "Growth Strategies", "Success Metrics"],
-            icon: Target,
-          },
-          {
-            id: "phase3",
-            title: "Case Studies",
-            description: "Product design and strategy cases",
-            duration: "Week 3",
-            topics: ["Product Design", "Estimation Questions", "Strategy Cases", "Prioritization", "Trade-offs"],
-            icon: Code,
-          },
-          {
-            id: "phase4",
-            title: "Behavioral & Execution",
-            description: "Leadership and execution scenarios",
-            duration: "Week 4",
-            topics: ["Conflict Resolution", "Cross-functional Work", "Failed Projects", "Innovation Stories", "Mock Interviews"],
-            icon: Users,
-          },
-        ];
-      case "behavioral":
-        return [
-          {
-            id: "phase1",
-            title: "STAR Method Mastery",
-            description: "Structure your responses effectively",
-            duration: "Days 1-7",
-            topics: ["STAR Framework", "Story Preparation", "Result Quantification", "Concise Delivery", "Active Listening"],
-            icon: BookOpen,
-          },
-          {
-            id: "phase2",
-            title: "Leadership & Teamwork",
-            description: "Demonstrate collaboration skills",
-            duration: "Days 8-14",
-            topics: ["Leadership Examples", "Team Conflicts", "Mentoring Others", "Influence Without Authority", "Collaboration"],
-            icon: Users,
-          },
-          {
-            id: "phase3",
-            title: "Problem-Solving & Adaptability",
-            description: "Show resilience and critical thinking",
-            duration: "Days 15-21",
-            topics: ["Complex Problems", "Failure Stories", "Adapting to Change", "Innovation", "Decision Making"],
-            icon: Target,
-          },
-          {
-            id: "phase4",
-            title: "Mock Interviews & Polish",
-            description: "Practice and refine your delivery",
-            duration: "Days 22-30",
-            topics: ["Mock Sessions", "Body Language", "Confidence Building", "Question Variations", "Final Review"],
-            icon: Code,
-          },
-        ];
-      default:
-        return [
-          {
-            id: "phase1",
-            title: "Resume & Basics",
-            description: "Perfect your resume and fundamentals",
-            duration: "Week 1",
-            topics: ["Resume Review", "Cover Letters", "Common Questions", "Elevator Pitch", "Company Research"],
-            icon: BookOpen,
-          },
-          {
-            id: "phase2",
-            title: "Industry Knowledge",
-            description: "Understand your target field",
-            duration: "Week 2",
-            topics: ["Industry Trends", "Company Culture", "Role Requirements", "Salary Negotiation", "Career Goals"],
-            icon: Target,
-          },
-          {
-            id: "phase3",
-            title: "Interview Skills",
-            description: "Master the interview process",
-            duration: "Week 3",
-            topics: ["Phone Screening", "Video Interviews", "In-person Tips", "Thank You Notes", "Follow-ups"],
-            icon: Users,
-          },
-          {
-            id: "phase4",
-            title: "Practice & Confidence",
-            description: "Build confidence through practice",
-            duration: "Week 4",
-            topics: ["Mock Interviews", "Body Language", "Stress Management", "Common Mistakes", "Final Prep"],
-            icon: Code,
-          },
-        ];
+    setPlan({ ...plan, completedPhases: [...completedSet] });
+
+    try {
+      const updated = await setPhaseCompleted(phaseId, nextCompleted);
+      setPlan(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unable to update phase");
+      setPlan(plan);
     }
   };
 
-  const phases = getPlansForType(interviewType);
-  const completionRate = Math.round((completedPhases.size / phases.length) * 100);
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        Loading plan...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!plan) {
+    return null;
+  }
+
+  const phases = plan.phases;
+  const completedPhases = new Set(plan.completedPhases);
+  const completionRate =
+    phases.length > 0
+      ? Math.round((completedPhases.size / phases.length) * 100)
+      : 0;
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Preparation Plan</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Your Preparation Plan
+        </h1>
         <p className="text-gray-600">
-          Follow this structured plan to ace your {interviewType} interview
+          Follow this structured plan to ace your {plan.interviewType} interview
         </p>
       </div>
 
       {/* Progress Bar */}
       <div className="bg-white rounded-lg p-6 mb-8 shadow-sm border">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">Overall Progress</span>
-          <span className="text-sm font-semibold text-purple-600">{completionRate}%</span>
+          <span className="text-sm font-medium text-gray-700">
+            Overall Progress
+          </span>
+          <span className="text-sm font-semibold text-purple-600">
+            {completionRate}%
+          </span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-3">
           <div
@@ -213,9 +132,9 @@ export function Plan() {
       {/* Plan Phases */}
       <div className="space-y-6">
         {phases.map((phase, index) => {
-          const Icon = phase.icon;
+          const Icon = phaseIcons[index % phaseIcons.length];
           const isCompleted = completedPhases.has(phase.id);
-          
+
           return (
             <div
               key={phase.id}
@@ -232,7 +151,7 @@ export function Plan() {
                     <Circle className="w-6 h-6 text-gray-300" />
                   )}
                 </button>
-                
+
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -241,8 +160,12 @@ export function Plan() {
                           <Icon className="w-5 h-5 text-purple-600" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">{phase.title}</h3>
-                          <p className="text-sm text-gray-500">{phase.duration}</p>
+                          <h3 className="font-semibold text-gray-900">
+                            {phase.title}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            {phase.duration}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -250,9 +173,9 @@ export function Plan() {
                       Phase {index + 1}
                     </span>
                   </div>
-                  
+
                   <p className="text-gray-600 mb-4">{phase.description}</p>
-                  
+
                   <div className="flex flex-wrap gap-2">
                     {phase.topics.map((topic) => (
                       <span

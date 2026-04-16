@@ -5,6 +5,7 @@ import { Plan } from "./components/plan";
 import { Schedule } from "./components/schedule";
 import { Practice } from "./components/practice";
 import { NotFound } from "./components/not-found";
+import { Auth } from "./components/auth";
 
 export const router = createBrowserRouter([
   {
@@ -12,6 +13,7 @@ export const router = createBrowserRouter([
     Component: Root,
     children: [
       { index: true, Component: Home },
+      { path: "auth", Component: Auth },
       { path: "plan", Component: Plan },
       { path: "schedule", Component: Schedule },
       { path: "practice", Component: Practice },
