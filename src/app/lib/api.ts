@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+
 export type InterviewType = "software" | "product" | "behavioral" | "general";
 export type Timeframe = "1week" | "2weeks" | "1month" | "2months";
 
@@ -58,8 +60,9 @@ interface AuthResponse {
   user: User;
 }
 
-const API_BASE = "/api";
+const API_BASE = import.meta.env.VITE_API_BASE || "/api";
 const TOKEN_KEY = "authToken";
+let lastSessionToastAt = 0;
 
 function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -75,6 +78,15 @@ export function clearToken() {
 
 export function isAuthenticated() {
   return Boolean(getToken());
+}
+
+function handleUnauthorizedResponse() {
+  clearToken();
+  const now = Date.now();
+  if (now - lastSessionToastAt > 10000) {
+    toast.error("Your session expired. Please log in again.");
+    lastSessionToastAt = now;
+  }
 }
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -94,7 +106,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   });
 
   if (response.status === 401) {
-    clearToken();
+    handleUnauthorizedResponse();
   }
 
   const payload = await response.json().catch(() => ({}));

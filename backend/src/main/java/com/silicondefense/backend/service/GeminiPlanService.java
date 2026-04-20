@@ -21,6 +21,8 @@ import java.util.List;
 public class GeminiPlanService {
 
     private static final Logger log = LoggerFactory.getLogger(GeminiPlanService.class);
+    private static final int MAX_RETRIES = 3;
+    private static final long BASE_RETRY_DELAY_MS = 500L;
 
     private final String apiKey;
     private final String model;
@@ -52,7 +54,7 @@ public class GeminiPlanService {
 
         try {
             String prompt = buildPrompt(userId, fullName, interviewType, timeframe, targetCompanies);
-            String responseJson = callGemini(prompt);
+            String responseJson = callGeminiWithRetry(prompt);
             PlanData parsed = parseGeminiResponse(responseJson);
             if (parsed != null && !parsed.phases.isEmpty() && !parsed.schedule.isEmpty() && !parsed.questions.isEmpty()) {
                 log.info("Gemini generation succeeded for user {} with model {}", userId, model);
@@ -64,6 +66,37 @@ public class GeminiPlanService {
         }
 
         return fallbackPlan(interviewType, timeframe, targetCompanies);
+    }
+
+    private String callGeminiWithRetry(String prompt) throws IOException, InterruptedException {
+        IOException lastFailure = null;
+        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                return callGemini(prompt);
+            } catch (IOException ex) {
+                lastFailure = ex;
+                boolean shouldRetry = isRetryableGeminiError(ex) && attempt < MAX_RETRIES;
+                if (!shouldRetry) {
+                    throw ex;
+                }
+                long delayMs = BASE_RETRY_DELAY_MS * (1L << (attempt - 1));
+                log.warn("Gemini request failed (attempt {}/{}). Retrying in {}ms. Reason: {}",
+                        attempt, MAX_RETRIES, delayMs, ex.getMessage());
+                Thread.sleep(delayMs);
+            }
+        }
+        throw lastFailure == null ? new IOException("Gemini request failed with unknown error") : lastFailure;
+    }
+
+    private boolean isRetryableGeminiError(IOException ex) {
+        String message = ex.getMessage();
+        if (message == null) {
+            return false;
+        }
+        return message.contains("status 429")
+                || message.contains("status 500")
+                || message.contains("status 503")
+                || message.contains("status 504");
     }
 
     private String callGemini(String prompt) throws IOException, InterruptedException {
