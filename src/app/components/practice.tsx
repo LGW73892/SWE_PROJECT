@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 import {
   ChevronDown,
   ChevronUp,
@@ -22,11 +23,13 @@ export function Practice() {
   const [filterDifficulty, setFilterDifficulty] = useState<string>("all");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [needsAuth, setNeedsAuth] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       if (!isAuthenticated()) {
         setError("Please sign up or login first.");
+        setNeedsAuth(true);
         setLoading(false);
         return;
       }
@@ -38,6 +41,7 @@ export function Practice() {
         setAnsweredIds(new Set(plan.answeredQuestionIds));
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unable to load questions");
+        setNeedsAuth(false);
       } finally {
         setLoading(false);
       }
@@ -92,7 +96,15 @@ export function Practice() {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-          {error}
+          <p>{error}</p>
+          {needsAuth && (
+            <Link
+              to="/auth"
+              className="mt-3 inline-flex rounded-md bg-emerald-900 px-4 py-2 text-sm font-semibold text-[#fffaf0] transition-colors hover:bg-emerald-800"
+            >
+              Go to Login / Sign Up
+            </Link>
+          )}
         </div>
       </div>
     );

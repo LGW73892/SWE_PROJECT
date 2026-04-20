@@ -22,11 +22,13 @@ export function Plan() {
   const [plan, setPlan] = useState<PlanData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [needsAuth, setNeedsAuth] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       if (!isAuthenticated()) {
         setError("Please sign up or login first.");
+        setNeedsAuth(true);
         setLoading(false);
         return;
       }
@@ -37,6 +39,7 @@ export function Plan() {
       } catch (e) {
         const message = e instanceof Error ? e.message : "Unable to load plan";
         setError(message);
+        setNeedsAuth(false);
       } finally {
         setLoading(false);
       }
@@ -83,7 +86,15 @@ export function Plan() {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-          {error}
+          <p>{error}</p>
+          {needsAuth && (
+            <Link
+              to="/auth"
+              className="mt-3 inline-flex rounded-md bg-emerald-900 px-4 py-2 text-sm font-semibold text-[#fffaf0] transition-colors hover:bg-emerald-800"
+            >
+              Go to Login / Sign Up
+            </Link>
+          )}
         </div>
       </div>
     );

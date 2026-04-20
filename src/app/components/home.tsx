@@ -275,16 +275,18 @@ export function Home() {
         )}
 
         {!isAuthenticated() && (
-          <p className="mt-4 text-sm text-stone-700">
-            You are not logged in. Continue at{" "}
+          <div className="mt-4 rounded-xl border border-amber-900/15 bg-amber-50/70 p-4">
+            <p className="text-sm text-stone-700">
+              You are not logged in yet. Sign in or create an account before
+              generating your plan.
+            </p>
             <Link
               to="/auth"
-              className="font-semibold text-emerald-900 underline"
+              className="mt-3 inline-flex items-center rounded-lg bg-emerald-900 px-4 py-2 text-sm font-semibold text-[#fffaf0] transition-colors hover:bg-emerald-800"
             >
-              Login / Sign Up
-            </Link>{" "}
-            first.
-          </p>
+              Go to Login / Sign Up
+            </Link>
+          </div>
         )}
       </div>
 
