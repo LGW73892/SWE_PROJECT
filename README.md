@@ -11,9 +11,9 @@ An interview preparation platform that generates personalized study plans and pr
 
 ## Tech Stack
 
-Frontend - React, TypeScript, Vite, Tailwind CSS
-Backend - Spring Boot, Spring Security
-Database - MongoDB 
-AI - Google Gemini API
+- Frontend - React, TypeScript, Vite, Tailwind CSS
+- Backend - Spring Boot, Spring Security
+- Database - MongoDB 
+- AI - Google Gemini API
 
   
