@@ -1,3 +1,4 @@
+import ChessBackground from "./ChessBackground";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import {
@@ -109,6 +110,7 @@ export function Home() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
       <div className="relative overflow-hidden rounded-[2rem] border border-emerald-900/12 bg-[#fffaf0]/90 shadow-[0_24px_80px_rgba(31,77,58,0.08)]">
         <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(45deg,#1f4d3a_25%,transparent_25%),linear-gradient(-45deg,#1f4d3a_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#1f4d3a_75%),linear-gradient(-45deg,transparent_75%,#1f4d3a_75%)] [background-size:48px_48px] [background-position:0_0,0_24px,24px_-24px,-24px_0]" />
+        <ChessBackground />
         <div className="relative px-6 py-10 sm:px-10 sm:py-14 lg:px-14 lg:py-16">
           <div className="mb-8 flex flex-wrap items-center gap-3 text-sm uppercase tracking-[0.3em] text-emerald-900/70">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-emerald-50 px-3 py-1 text-[11px] tracking-[0.35em] text-emerald-900">
