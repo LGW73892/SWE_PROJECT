@@ -1,10 +1,11 @@
 import ChessBackground from "./ChessBackground";
-import { useState, useRef, useEffect} from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import {
   ArrowRight,
   Briefcase,
   Castle,
+  ChevronDown,
   Code,
   Crown,
   Shield,
@@ -12,7 +13,12 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { generatePlan, isAuthenticated, updateMyProfile } from "../lib/api";
+import {
+  generatePlan,
+  getMyProfile,
+  isAuthenticated,
+  updateMyProfile,
+} from "../lib/api";
 
 const interviewTypes = [
   {
@@ -52,13 +58,176 @@ const timeframes = [
   { id: "2months", label: "2 Months", days: 60 },
 ];
 
+type TopicPreference = "strength" | "neutral" | "weakness";
+
+const topicCategories: Record<string, string[]> = {
+  DSA: [
+    "Arrays & Strings",
+    "Hash Maps & Sets",
+    "Two Pointers",
+    "Sliding Window",
+    "Stacks & Queues",
+    "Linked Lists",
+    "Trees & Traversals",
+    "Binary Search",
+    "Heaps & Priority Queues",
+    "Graphs (BFS/DFS)",
+    "Dynamic Programming",
+    "Greedy Algorithms",
+    "Backtracking",
+    "Recursion",
+    "Time/Space Complexity",
+  ],
+  "System & Software Design": [
+    "Object-Oriented Design",
+    "Design Patterns",
+    "System Design Fundamentals",
+    "Scalability & Performance",
+    "Caching",
+    "Microservices",
+    "Distributed Systems",
+    "Concurrency & Multithreading",
+  ],
+  "Backend, Databases & Infra": [
+    "Databases & SQL",
+    "NoSQL & MongoDB",
+    "REST API Design",
+    "Authentication & Security",
+    "Testing Strategy",
+    "Debugging & Troubleshooting",
+    "Git & Collaboration",
+    "CI/CD Basics",
+    "Cloud Fundamentals",
+  ],
+  "Behavioral & Leadership": [
+    "Behavioral Storytelling",
+    "Leadership Examples",
+    "Conflict Resolution",
+    "Stakeholder Communication",
+  ],
+  "Product & Strategy": [
+    "Product Sense",
+    "Metrics & Analytics",
+    "Prioritization",
+    "Roadmapping",
+  ],
+};
+
+const reviewTopicOptions = Object.values(topicCategories).reduce<string[]>(
+  (acc, topics) => acc.concat(topics),
+  [],
+);
+
+const buildPreferencesSignature = (
+  preferences: Record<string, TopicPreference>,
+  companies: string[],
+) => {
+  const topicPart = reviewTopicOptions
+    .map((topic) => `${topic}:${preferences[topic] ?? "neutral"}`)
+    .join("|");
+
+  const companyPart = [...companies].sort().join("|");
+  return `${companyPart}||${topicPart}`;
+};
+
 export function Home() {
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>("");
   const [targetCompaniesInput, setTargetCompaniesInput] = useState("");
+  const [topicPreferences, setTopicPreferences] = useState<
+    Record<string, TopicPreference>
+  >(() =>
+    Object.fromEntries(
+      reviewTopicOptions.map((topic) => [topic, "neutral" as TopicPreference]),
+    ),
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const [lastSavedSignature, setLastSavedSignature] = useState("");
+
+  useEffect(() => {
+    const loadSavedPreferences = async () => {
+      if (!isAuthenticated()) {
+        setProfileLoaded(true);
+        return;
+      }
+
+      try {
+        const profile = await getMyProfile();
+        const loadedCompanies = profile.targetCompanies ?? [];
+        setTargetCompaniesInput(loadedCompanies.join(", "));
+
+        const loadedPreferences = Object.fromEntries(
+          reviewTopicOptions.map((topic) => {
+            const status = profile.topicPreferences?.[topic];
+            const normalizedStatus: TopicPreference =
+              status === "strength" ||
+              status === "weakness" ||
+              status === "neutral"
+                ? status
+                : "neutral";
+            return [topic, normalizedStatus];
+          }),
+        ) as Record<string, TopicPreference>;
+
+        setTopicPreferences(loadedPreferences);
+        setLastSavedSignature(
+          buildPreferencesSignature(loadedPreferences, loadedCompanies),
+        );
+      } catch {
+        // Non-blocking: Home still works with local defaults.
+      } finally {
+        setProfileLoaded(true);
+      }
+    };
+
+    void loadSavedPreferences();
+  }, []);
+
+  useEffect(() => {
+    if (!profileLoaded || !isAuthenticated()) {
+      return;
+    }
+
+    const currentSignature = buildPreferencesSignature(
+      topicPreferences,
+      targetCompanies,
+    );
+
+    if (currentSignature === lastSavedSignature) {
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      const profileTopicPreferences = Object.fromEntries(
+        reviewTopicOptions.map((topic) => [
+          topic,
+          topicPreferences[topic] ?? "neutral",
+        ]),
+      ) as Record<string, TopicPreference>;
+
+      setSaveStatus("saving");
+      try {
+        await updateMyProfile("", targetCompanies, profileTopicPreferences);
+        setLastSavedSignature(currentSignature);
+        setSaveStatus("saved");
+      } catch {
+        setSaveStatus("error");
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [
+    profileLoaded,
+    topicPreferences,
+    targetCompaniesInput,
+    lastSavedSignature,
+  ]);
 
   const companies = ["Google", "Amazon", "Meta", "Apple", "Microsoft", "Stripe",
                              "OpenAI", "Nvidia", "Adobe", "Palantir", "Netflix", "Uber",
@@ -96,6 +265,30 @@ export function Home() {
     .map((company) => company.trim())
     .filter(Boolean);
 
+  const strengths = reviewTopicOptions.filter(
+    (topic) => topicPreferences[topic] === "strength",
+  );
+  const weaknesses = reviewTopicOptions.filter(
+    (topic) => topicPreferences[topic] === "weakness",
+  );
+  const neutralTopics = reviewTopicOptions.filter(
+    (topic) =>
+      topicPreferences[topic] !== "strength" &&
+      topicPreferences[topic] !== "weakness",
+  );
+
+  const cycleTopicPreference = (topic: string) => {
+    setTopicPreferences((prev) => ({
+      ...prev,
+      [topic]:
+        prev[topic] === "neutral"
+          ? "weakness"
+          : prev[topic] === "weakness"
+            ? "strength"
+            : "neutral",
+    }));
+  };
+
   const handleGetStarted = async () => {
     if (!selectedType || !selectedTimeframe) {
       setError("Please select interview type and timeframe.");
@@ -112,7 +305,14 @@ export function Home() {
     setIsSubmitting(true);
 
     try {
-      await updateMyProfile("", targetCompanies);
+      const profileTopicPreferences = Object.fromEntries(
+        reviewTopicOptions.map((topic) => [
+          topic,
+          topicPreferences[topic] ?? "neutral",
+        ]),
+      ) as Record<string, TopicPreference>;
+
+      await updateMyProfile("", targetCompanies, profileTopicPreferences);
 
       await generatePlan({
         interviewType: selectedType as
@@ -126,6 +326,9 @@ export function Home() {
           | "1month"
           | "2months",
         targetCompanies,
+        strengths,
+        weaknesses,
+        neutralTopics,
       });
 
       navigate("/plan");
@@ -284,6 +487,112 @@ export function Home() {
       {/* Get Started Button */}
       <div className="mb-8 rounded-2xl border border-emerald-900/10 bg-white/85 p-6 shadow-sm">
         <h2 className="mb-4 text-2xl font-semibold text-stone-900">
+          Topic Customization
+        </h2>
+        <p className="mb-4 text-sm text-stone-600">
+          select the topics you feel strongest in, weakest in, and neutral about
+          to tailor your prep plan.
+        </p>
+
+        <div className="mb-4 flex flex-wrap gap-2 text-xs">
+          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-medium text-emerald-800">
+            Strengths: {strengths.length}
+          </span>
+          <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 font-medium text-stone-700">
+            Neutral: {neutralTopics.length}
+          </span>
+          <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 font-medium text-red-700">
+            Weaknesses: {weaknesses.length}
+          </span>
+        </div>
+
+        <div className="mb-3 text-xs text-stone-600">
+          {saveStatus === "saving" && <span>Saving topic status...</span>}
+          {saveStatus === "saved" && (
+            <span className="text-emerald-800">
+              Topic status saved to your profile.
+            </span>
+          )}
+          {saveStatus === "error" && (
+            <span className="text-red-700">
+              Unable to save right now. Try again in a moment.
+            </span>
+          )}
+        </div>
+
+        <div className="max-h-[28rem] space-y-2 overflow-y-auto rounded-xl border border-emerald-900/10 bg-[#fffaf0]/70 p-3">
+          {Object.entries(topicCategories).map(([category, topics], index) => (
+            <details
+              key={category}
+              className="group rounded-lg border border-emerald-900/10 bg-white/80"
+              open={index === 0}
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-2">
+                <span className="text-sm font-semibold text-stone-800">
+                  {category}
+                </span>
+                <ChevronDown className="h-4 w-4 text-stone-600 transition-transform group-open:rotate-180" />
+              </summary>
+              <div className="border-t border-emerald-900/10 px-3 py-3">
+                <div className="flex flex-wrap gap-2">
+                  {topics.map((topic) => {
+                    const preference = topicPreferences[topic] ?? "neutral";
+                    const colorClass =
+                      preference === "strength"
+                        ? "border-emerald-300 bg-emerald-50 text-emerald-900"
+                        : preference === "weakness"
+                          ? "border-red-300 bg-red-50 text-red-700"
+                          : "border-amber-300 bg-amber-50 text-stone-700";
+                    const stateText =
+                      preference === "strength"
+                        ? "Strength"
+                        : preference === "weakness"
+                          ? "Weakness"
+                          : "Neutral";
+
+                    return (
+                      <button
+                        type="button"
+                        key={topic}
+                        onClick={() => cycleTopicPreference(topic)}
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-colors ${colorClass}`}
+                        title={`${topic}: ${stateText}`}
+                      >
+                        <span>{topic}</span>
+                        <span className="rounded-full border border-current/30 px-2 py-0.5 text-xs">
+                          {stateText}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </details>
+          ))}
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() =>
+              setTopicPreferences(
+                Object.fromEntries(
+                  reviewTopicOptions.map((topic) => [
+                    topic,
+                    "neutral" as TopicPreference,
+                  ]),
+                ),
+              )
+            }
+            className="rounded-lg border border-emerald-900/20 bg-white px-3 py-2 text-sm font-medium text-stone-700 hover:bg-amber-50"
+          >
+            Reset All to Neutral
+          </button>
+        </div>
+      </div>
+
+      <div className="mb-8 rounded-2xl border border-emerald-900/10 bg-white/85 p-6 shadow-sm">
+        <h2 className="mb-4 text-2xl font-semibold text-stone-900">
           Company Targeting
         </h2>
         <p className="mb-4 text-sm text-stone-600">
@@ -339,6 +648,11 @@ export function Home() {
           {isSubmitting ? "Generating..." : "Generate My Plan"}
           <ArrowRight className="w-5 h-5" />
         </button>
+        {isSubmitting && (
+          <p className="mt-3 text-sm text-stone-600">
+            This will take a couple minutes.
+          </p>
+        )}
       </div>
     </div>
   );

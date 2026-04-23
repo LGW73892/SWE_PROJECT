@@ -1,0 +1,23 @@
+[
+  {
+    "company": "Google",
+    "category": "behavioral",
+    "difficulty": "medium",
+    "question": "Tell me about a time you had to influence without authority.",
+    "tips": ["Use STAR", "Describe constraints", "Show measurable impact"]
+  },
+  {
+    "company": "Meta",
+    "category": "behavioral",
+    "difficulty": "medium",
+    "question": "Describe a difficult cross-functional collaboration and how you handled it.",
+    "tips": ["Highlight communication", "Explain tradeoffs", "Show outcome"]
+  },
+  {
+    "company": "Amazon",
+    "category": "behavioral",
+    "difficulty": "medium",
+    "question": "Tell me about a time you took ownership of a failing project and turned it around.",
+    "tips": ["Use STAR", "Highlight tradeoffs", "Quantify business impact"]
+  }
+]

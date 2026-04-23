@@ -3,11 +3,45 @@ import { toast } from "sonner";
 export type InterviewType = "software" | "product" | "behavioral" | "general";
 export type Timeframe = "1week" | "2weeks" | "1month" | "2months";
 
+export interface JobApplication {
+  company: string;
+  role: string;
+  status: string;
+  notes: string;
+}
+
+export interface LeetCodeEntry {
+  title: string;
+  difficulty: string;
+  status: string;
+  notes: string;
+}
+
+export interface CompanyQuestionBankSearchResult {
+  company: string;
+  total: number;
+  categories: Record<
+    string,
+    Array<{
+      question: string;
+      difficulty: string;
+      tips: string[];
+    }>
+  >;
+}
+
 export interface User {
   id: string;
   email: string;
   fullName: string;
   targetCompanies: string[];
+  topicPreferences: Record<string, "strength" | "neutral" | "weakness">;
+  strengths: string[];
+  weaknesses: string[];
+  neutralTopics: string[];
+  applications: JobApplication[];
+  leetCodeEntries: LeetCodeEntry[];
+  profileNotes: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,6 +70,7 @@ export interface DaySchedule {
 export interface PracticeQuestion {
   id: string;
   question: string;
+  phaseId: string;
   category: string;
   difficulty: "easy" | "medium" | "hard";
   tips: string[];
@@ -46,12 +81,16 @@ export interface PlanData {
   interviewType: InterviewType;
   timeframe: Timeframe;
   targetCompanies: string[];
+  strengths: string[];
+  weaknesses: string[];
+  neutralTopics: string[];
   phases: PlanPhase[];
   schedule: DaySchedule[];
   questions: PracticeQuestion[];
   completedPhases: string[];
   completedTaskIds: string[];
   answeredQuestionIds: string[];
+  usedQuestionKeys?: string[];
   updatedAt: string;
 }
 
@@ -142,10 +181,35 @@ export async function getMyProfile() {
 export async function updateMyProfile(
   fullName: string,
   targetCompanies: string[],
+  topicPreferences?: Record<string, "strength" | "neutral" | "weakness">,
+  applications?: JobApplication[],
+  leetCodeEntries?: LeetCodeEntry[],
+  profileNotes?: string,
 ) {
   return request<User>("/profile/me", {
     method: "PUT",
-    body: JSON.stringify({ fullName, targetCompanies }),
+    body: JSON.stringify({
+      fullName,
+      targetCompanies,
+      topicPreferences,
+      applications,
+      leetCodeEntries,
+      profileNotes,
+    }),
+  });
+}
+
+export async function updateMyApplications(applications: JobApplication[]) {
+  return request<User>("/profile/me/applications", {
+    method: "PATCH",
+    body: JSON.stringify({ applications }),
+  });
+}
+
+export async function updateMyLeetCodeEntries(leetCodeEntries: LeetCodeEntry[]) {
+  return request<User>("/profile/me/leetcode", {
+    method: "PATCH",
+    body: JSON.stringify({ leetCodeEntries }),
   });
 }
 
@@ -153,6 +217,9 @@ export async function generatePlan(input: {
   interviewType: InterviewType;
   timeframe: Timeframe;
   targetCompanies: string[];
+  strengths: string[];
+  weaknesses: string[];
+  neutralTopics: string[];
 }) {
   return request<PlanData>("/plans/generate", {
     method: "POST",
@@ -186,4 +253,16 @@ export async function setQuestionAnswered(
     method: "PATCH",
     body: JSON.stringify({ completed }),
   });
+}
+
+export async function searchQuestionBankCompanies(query: string) {
+  return request<{ companies: string[]; count: number }>(
+    `/question-bank/companies?query=${encodeURIComponent(query)}`,
+  );
+}
+
+export async function getQuestionBankForCompany(company: string) {
+  return request<CompanyQuestionBankSearchResult>(
+    `/question-bank/search?company=${encodeURIComponent(company)}`,
+  );
 }

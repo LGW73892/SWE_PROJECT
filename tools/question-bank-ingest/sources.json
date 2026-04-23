@@ -1,0 +1,44 @@
+{
+  "sources": [
+    {
+      "type": "github-repo-csv",
+      "name": "companywise-leetcode",
+      "repoUrl": "https://github.com/snehasishroy/leetcode-companywise-interview-questions.git",
+      "csvFileName": "all.csv",
+      "category": "leetcode",
+      "defaultDifficulty": "medium"
+    },
+    {
+      "type": "github-repo-markdown",
+      "name": "tech-interview-handbook",
+      "repoUrl": "https://github.com/yangshun/tech-interview-handbook.git",
+      "category": "leetcode",
+      "defaultDifficulty": "medium"
+    },
+    {
+      "type": "github-repo-markdown",
+      "name": "awesome-software-engineering-interview",
+      "repoUrl": "https://github.com/imkgarg/Awesome-Software-Engineering-Interview.git",
+      "company": "General",
+      "category": "behavioral",
+      "defaultDifficulty": "medium"
+    },
+    {
+      "type": "manual-json",
+      "name": "manual-system-design-and-behavioral",
+      "filePath": "tools/question-bank-ingest/manual-questions.json"
+    },
+    {
+      "type": "web-pages",
+      "name": "public-aggregators",
+      "category": "behavioral",
+      "defaultDifficulty": "medium",
+      "pages": [
+        {
+          "url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions",
+          "company": "General"
+        }
+      ]
+    }
+  ]
+}

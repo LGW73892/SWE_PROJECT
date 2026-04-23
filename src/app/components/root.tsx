@@ -1,6 +1,13 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router";
-import { useEffect, useState } from "react";
-import { Calendar, CheckSquare, Crown, Home } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  Calendar,
+  CheckSquare,
+  ChevronDown,
+  Crown,
+  Database,
+  Home,
+} from "lucide-react";
 import prepKingLogo from "../../assets/prep-king-logo.svg";
 import { clearToken, getMyProfile, isAuthenticated } from "../lib/api";
 
@@ -9,6 +16,8 @@ export function Root() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(isAuthenticated());
   const [fullName, setFullName] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -30,10 +39,30 @@ export function Root() {
     void loadProfile();
   }, [location.pathname]);
 
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const onDocumentClick = (event: MouseEvent) => {
+      if (!menuRef.current) {
+        return;
+      }
+
+      if (!menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onDocumentClick);
+    return () => document.removeEventListener("mousedown", onDocumentClick);
+  }, []);
+
   const handleLogout = () => {
     clearToken();
     setIsLoggedIn(false);
     setFullName("");
+    setMenuOpen(false);
     navigate("/");
   };
 
@@ -42,12 +71,13 @@ export function Root() {
     { path: "/plan", icon: Crown, label: "Plan" },
     { path: "/schedule", icon: Calendar, label: "Schedule" },
     { path: "/practice", icon: CheckSquare, label: "Practice" },
+    { path: "/question-bank", icon: Database, label: "Question DB" },
   ];
 
   return (
     <div className="size-full flex flex-col">
       {/* Header */}
-      <header className="-b bordborderer-emerald-900/15 bg-[#fffaf0]/95 backdrop-blur supports-[backdrop-filter]:bg-[#fffaf0]/80 shadow-[0_2px_24px_rgba(31,77,58,0.06)]">
+      <header className="-b bordborderer-emerald-900/15 relative z-50 bg-[#fffaf0]/95 backdrop-blur supports-[backdrop-filter]:bg-[#fffaf0]/80 shadow-[0_2px_24px_rgba(31,77,58,0.06)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-3">
@@ -85,12 +115,17 @@ export function Root() {
                   </Link>
                 );
               })}
+            </nav>
+
+            <div className="relative z-50" ref={menuRef}>
               {isLoggedIn ? (
                 <button
-                  onClick={handleLogout}
-                  className="rounded-md bg-emerald-900 px-3 py-2 text-[#fffaf0] transition-colors hover:bg-emerald-800"
+                  type="button"
+                  onClick={() => setMenuOpen((prev) => !prev)}
+                  className="inline-flex items-center gap-2 rounded-md bg-emerald-900 px-3 py-2 text-[#fffaf0] transition-colors hover:bg-emerald-800"
                 >
-                  Logout {fullName ? `(${fullName})` : ""}
+                  {fullName || "Account"}
+                  <ChevronDown className="h-4 w-4" />
                 </button>
               ) : (
                 <Link
@@ -100,7 +135,25 @@ export function Root() {
                   Login / Sign Up
                 </Link>
               )}
-            </nav>
+
+              {isLoggedIn && menuOpen && (
+                <div className="absolute right-0 z-50 mt-2 w-44 rounded-lg border border-emerald-900/10 bg-[#fffaf0] p-1 shadow-lg">
+                  <Link
+                    to="/profile"
+                    className="block rounded-md px-3 py-2 text-sm text-stone-700 hover:bg-emerald-50 hover:text-emerald-900"
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="block w-full rounded-md px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>

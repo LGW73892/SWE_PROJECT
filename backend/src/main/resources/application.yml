@@ -1,7 +1,9 @@
 spring:
+  config:
+    import: optional:file:./secret.properties
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb:}
+      uri: ${MONGODB_URI}
 
 server:
   port: ${PORT:8080}

@@ -1,6 +1,7 @@
 package com.silicondefense.backend.controller;
 
 import com.silicondefense.backend.service.AuthService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -24,24 +25,24 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public Map<String, Object> signup(@RequestBody SignupRequest request) {
+    public Map<String, Object> signup(@Valid @RequestBody SignupRequest request) {
         return authService.signup(request.email(), request.password(), request.fullName());
     }
 
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody LoginRequest request) {
+    public Map<String, Object> login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request.email(), request.password());
     }
 
     public record SignupRequest(
-            @Email String email,
-            @Size(min = 8, max = 128) String password,
+            @NotBlank @Email String email,
+            @NotBlank @Size(min = 8, max = 128) String password,
             @NotBlank String fullName
     ) {
     }
 
     public record LoginRequest(
-            @Email String email,
+            @NotBlank @Email String email,
             @NotBlank String password
     ) {
     }

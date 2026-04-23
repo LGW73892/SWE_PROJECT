@@ -69,15 +69,15 @@ export function Schedule() {
   const getTypeColor = (type: string) => {
     switch (type) {
       case "study":
-        return "bg-purple-100 text-purple-700 border-purple-200";
+        return "bg-emerald-100 text-emerald-800 border-emerald-200";
       case "practice":
-        return "bg-gray-100 text-gray-700 border-gray-200";
+        return "bg-amber-100 text-stone-700 border-amber-200";
       case "review":
-        return "bg-purple-50 text-purple-600 border-purple-100";
+        return "bg-emerald-50 text-emerald-700 border-emerald-100";
       case "mock":
-        return "bg-gray-200 text-gray-800 border-gray-300";
+        return "bg-stone-200 text-stone-800 border-stone-300";
       default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
+        return "bg-stone-100 text-stone-700 border-stone-200";
     }
   };
 
@@ -187,10 +187,10 @@ export function Schedule() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold text-stone-900 mb-2">
           Your Study Schedule
         </h1>
-        <p className="text-gray-600">
+        <p className="text-stone-600">
           Daily tasks and milestones for your {timeframe} preparation
         </p>
       </div>
@@ -317,28 +317,30 @@ export function Schedule() {
       </div>
 
       {/* Progress Summary */}
-      <div className="bg-white rounded-lg p-6 mb-8 shadow-sm border">
+      <div className="rounded-2xl border border-emerald-900/10 bg-[#fffaf0]/90 p-6 mb-8 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
           <div>
-            <div className="text-sm text-gray-600 mb-1">Total Tasks</div>
-            <div className="text-2xl font-bold text-gray-900">{totalTasks}</div>
+            <div className="text-sm text-stone-600 mb-1">Total Tasks</div>
+            <div className="text-2xl font-bold text-stone-900">
+              {totalTasks}
+            </div>
           </div>
           <div>
-            <div className="text-sm text-gray-600 mb-1">Completed</div>
+            <div className="text-sm text-stone-600 mb-1">Completed</div>
             <div className="text-2xl font-bold text-green-600">
               {completedTasks}
             </div>
           </div>
           <div>
-            <div className="text-sm text-gray-600 mb-1">Progress</div>
-            <div className="text-2xl font-bold text-purple-600">
+            <div className="text-sm text-stone-600 mb-1">Progress</div>
+            <div className="text-2xl font-bold text-emerald-900">
               {completionRate}%
             </div>
           </div>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-3">
+        <div className="w-full bg-amber-100 rounded-full h-3">
           <div
-            className="bg-purple-500 h-3 rounded-full transition-all duration-300"
+            className="bg-emerald-900 h-3 rounded-full transition-all duration-300"
             style={{ width: `${completionRate}%` }}
           />
         </div>
@@ -354,15 +356,16 @@ export function Schedule() {
           return (
             <div
               key={day.day}
-              className={`bg-white rounded-lg p-6 shadow-sm border ${
-                dayCompleted ? "border-green-300 bg-green-50" : ""
+              className={`rounded-2xl p-6 shadow-sm border border-emerald-900/10 bg-[#fffaf0]/90 ${
+                dayCompleted ? "border-green-300 bg-green-50/70" : ""
               }`}
             >
               <div className="flex items-center gap-3 mb-4">
-                <CalendarDays className="w-5 h-5 text-purple-600" />
+                <CalendarDays className="w-5 h-5 text-emerald-900" />
                 <div>
-                  <h3 className="font-semibold text-gray-900">Day {day.day}</h3>
-                  <p className="text-sm text-gray-600">{day.date}</p>
+                  <h3 className="font-semibold text-stone-900">
+                    Day {day.day}
+                  </h3>
                 </div>
                 {dayCompleted && (
                   <CheckCircle2 className="w-5 h-5 text-green-600 ml-auto" />
@@ -373,7 +376,7 @@ export function Schedule() {
                 {day.tasks.map((task) => (
                   <div
                     key={task.id}
-                    className="flex items-start gap-3 p-3 rounded-lg border bg-gray-50 hover:bg-gray-100 transition-colors"
+                    className="flex items-start gap-3 p-3 rounded-lg border border-emerald-900/10 bg-white/80 hover:bg-amber-50 transition-colors"
                   >
                     <button
                       onClick={() => toggleTask(task.id)}
@@ -398,13 +401,13 @@ export function Schedule() {
 
                     <div className="flex-1">
                       <h4
-                        className={`font-medium ${completedTaskIds.has(task.id) ? "line-through text-gray-500" : "text-gray-900"}`}
+                        className={`font-medium ${completedTaskIds.has(task.id) ? "line-through text-stone-500" : "text-stone-900"}`}
                       >
                         {task.title}
                       </h4>
                       <div className="flex items-center gap-2 mt-1">
-                        <Clock className="w-3 h-3 text-gray-500" />
-                        <span className="text-sm text-gray-600">
+                        <Clock className="w-3 h-3 text-stone-500" />
+                        <span className="text-sm text-stone-600">
                           {task.duration}
                         </span>
                       </div>

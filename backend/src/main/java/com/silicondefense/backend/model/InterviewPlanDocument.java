@@ -21,6 +21,9 @@ public class InterviewPlanDocument {
     private String interviewType;
     private String timeframe;
     private List<String> targetCompanies = new ArrayList<>();
+    private List<String> strengths = new ArrayList<>();
+    private List<String> weaknesses = new ArrayList<>();
+    private List<String> neutralTopics = new ArrayList<>();
 
     private List<PlanPhase> phases = new ArrayList<>();
     private List<DaySchedule> schedule = new ArrayList<>();
@@ -29,6 +32,7 @@ public class InterviewPlanDocument {
     private Set<String> completedPhases = new HashSet<>();
     private Set<String> completedTaskIds = new HashSet<>();
     private Set<String> answeredQuestionIds = new HashSet<>();
+    private Set<String> usedQuestionKeys = new HashSet<>();
 
     private Instant createdAt;
     private Instant updatedAt;
@@ -71,6 +75,30 @@ public class InterviewPlanDocument {
 
     public void setTargetCompanies(List<String> targetCompanies) {
         this.targetCompanies = targetCompanies;
+    }
+
+    public List<String> getStrengths() {
+        return strengths;
+    }
+
+    public void setStrengths(List<String> strengths) {
+        this.strengths = strengths;
+    }
+
+    public List<String> getWeaknesses() {
+        return weaknesses;
+    }
+
+    public void setWeaknesses(List<String> weaknesses) {
+        this.weaknesses = weaknesses;
+    }
+
+    public List<String> getNeutralTopics() {
+        return neutralTopics;
+    }
+
+    public void setNeutralTopics(List<String> neutralTopics) {
+        this.neutralTopics = neutralTopics;
     }
 
     public List<PlanPhase> getPhases() {
@@ -119,6 +147,14 @@ public class InterviewPlanDocument {
 
     public void setAnsweredQuestionIds(Set<String> answeredQuestionIds) {
         this.answeredQuestionIds = answeredQuestionIds;
+    }
+
+    public Set<String> getUsedQuestionKeys() {
+        return usedQuestionKeys;
+    }
+
+    public void setUsedQuestionKeys(Set<String> usedQuestionKeys) {
+        this.usedQuestionKeys = usedQuestionKeys;
     }
 
     public Instant getCreatedAt() {
@@ -257,6 +293,7 @@ public class InterviewPlanDocument {
     public static class PracticeQuestion {
         private String id;
         private String question;
+        private String phaseId;
         private String category;
         private String difficulty;
         private List<String> tips = new ArrayList<>();
@@ -275,6 +312,14 @@ public class InterviewPlanDocument {
 
         public void setQuestion(String question) {
             this.question = question;
+        }
+
+        public String getPhaseId() {
+            return phaseId;
+        }
+
+        public void setPhaseId(String phaseId) {
+            this.phaseId = phaseId;
         }
 
         public String getCategory() {

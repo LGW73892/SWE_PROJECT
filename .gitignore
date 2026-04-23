@@ -2,9 +2,12 @@ node_modules/
 dist/
 *.log
 
+secret.properties
+backend/secret.properties
 .env
 .env.local
 .env.*.local
+backend/.env
 
 .vscode/
 .idea/

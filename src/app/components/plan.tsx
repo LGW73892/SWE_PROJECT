@@ -114,27 +114,27 @@ export function Plan() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold text-stone-900 mb-2">
           Your Preparation Plan
         </h1>
-        <p className="text-gray-600">
+        <p className="text-stone-600">
           Follow this structured plan to ace your {plan.interviewType} interview
         </p>
       </div>
 
       {/* Progress Bar */}
-      <div className="bg-white rounded-lg p-6 mb-8 shadow-sm border">
+      <div className="rounded-2xl border border-emerald-900/10 bg-[#fffaf0]/90 p-6 mb-8 shadow-sm">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-stone-700">
             Overall Progress
           </span>
-          <span className="text-sm font-semibold text-purple-600">
+          <span className="text-sm font-semibold text-emerald-900">
             {completionRate}%
           </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-3">
+        <div className="w-full bg-amber-100 rounded-full h-3">
           <div
-            className="bg-purple-500 h-3 rounded-full transition-all duration-300"
+            className="bg-emerald-900 h-3 rounded-full transition-all duration-300"
             style={{ width: `${completionRate}%` }}
           />
         </div>
@@ -145,11 +145,14 @@ export function Plan() {
         {phases.map((phase, index) => {
           const Icon = phaseIcons[index % phaseIcons.length];
           const isCompleted = completedPhases.has(phase.id);
+          const phaseQuestionCount = plan.questions.filter(
+            (question) => question.phaseId === phase.id,
+          ).length;
 
           return (
             <div
               key={phase.id}
-              className="bg-white rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow"
+              className="rounded-2xl p-6 shadow-sm border border-emerald-900/10 bg-[#fffaf0]/90 hover:shadow-md transition-shadow"
             >
               <div className="flex items-start gap-4">
                 <button
@@ -159,7 +162,7 @@ export function Plan() {
                   {isCompleted ? (
                     <CheckCircle2 className="w-6 h-6 text-green-600" />
                   ) : (
-                    <Circle className="w-6 h-6 text-gray-300" />
+                    <Circle className="w-6 h-6 text-emerald-900/30" />
                   )}
                 </button>
 
@@ -167,31 +170,35 @@ export function Plan() {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <div className="flex items-center gap-3 mb-1">
-                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <Icon className="w-5 h-5 text-purple-600" />
+                        <div className="w-10 h-10 bg-emerald-900 rounded-lg flex items-center justify-center">
+                          <Icon className="w-5 h-5 text-[#fffaf0]" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">
+                          <h3 className="font-semibold text-stone-900">
                             {phase.title}
                           </h3>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-stone-500">
                             {phase.duration}
                           </p>
                         </div>
                       </div>
                     </div>
-                    <span className="text-sm font-medium text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
+                    <span className="text-sm font-medium text-emerald-900 bg-emerald-50 px-3 py-1 rounded-full">
                       Phase {index + 1}
                     </span>
                   </div>
 
-                  <p className="text-gray-600 mb-4">{phase.description}</p>
+                  <p className="text-stone-600 mb-4">{phase.description}</p>
+
+                  <p className="mb-3 text-sm text-emerald-900">
+                    Practice set: {phaseQuestionCount} questions
+                  </p>
 
                   <div className="flex flex-wrap gap-2">
                     {phase.topics.map((topic) => (
                       <span
                         key={topic}
-                        className="text-xs font-medium text-gray-600 bg-gray-100 px-3 py-1 rounded-full"
+                        className="text-xs font-medium text-stone-600 bg-amber-50 px-3 py-1 rounded-full border border-emerald-900/10"
                       >
                         {topic}
                       </span>
@@ -208,14 +215,14 @@ export function Plan() {
       <div className="mt-8 flex flex-col sm:flex-row gap-4">
         <Link
           to="/schedule"
-          className="flex-1 flex items-center justify-center gap-2 bg-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-600 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 bg-emerald-900 text-[#fffaf0] px-6 py-3 rounded-lg font-semibold hover:bg-emerald-800 transition-colors"
         >
           View Schedule
           <ArrowRight className="w-5 h-5" />
         </Link>
         <Link
           to="/practice"
-          className="flex-1 flex items-center justify-center gap-2 bg-white text-purple-600 border-2 border-purple-500 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 bg-[#fffaf0] text-emerald-900 border-2 border-emerald-900 px-6 py-3 rounded-lg font-semibold hover:bg-emerald-50 transition-colors"
         >
           Start Practicing
         </Link>

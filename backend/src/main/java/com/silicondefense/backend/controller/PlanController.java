@@ -30,7 +30,10 @@ public class PlanController {
                 AuthContext.currentUser().getUserId(),
                 request.interviewType(),
                 request.timeframe(),
-                request.targetCompanies() == null ? List.of() : request.targetCompanies()
+                request.targetCompanies() == null ? List.of() : request.targetCompanies(),
+                request.strengths() == null ? List.of() : request.strengths(),
+                request.weaknesses() == null ? List.of() : request.weaknesses(),
+                request.neutralTopics() == null ? List.of() : request.neutralTopics()
         );
     }
 
@@ -66,7 +69,10 @@ public class PlanController {
     public record GeneratePlanRequest(
             @NotBlank String interviewType,
             @NotBlank String timeframe,
-            List<String> targetCompanies
+            List<String> targetCompanies,
+            List<String> strengths,
+            List<String> weaknesses,
+            List<String> neutralTopics
     ) {
     }
 
