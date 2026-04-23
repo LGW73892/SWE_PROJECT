@@ -1,12 +1,17 @@
+import { useState } from "react";
 import { RouterProvider } from 'react-router';
 import { Toaster } from "sonner";
 import { router } from './routes';
+import SplashScreen from './components/SplashScreen';
 
 export default function App() {
-  return (
-    <>
-      <RouterProvider router={router} />
-      <Toaster richColors position="top-right" />
-    </>
-  );
+    const [splashDone, setSplashDone] = useState(false);
+
+    return (
+        <>
+            {!splashDone && <SplashScreen onComplete={() => setSplashDone(true)} />}
+            <RouterProvider router={router} />
+            <Toaster richColors position="top-right" />
+        </>
+    );
 }
