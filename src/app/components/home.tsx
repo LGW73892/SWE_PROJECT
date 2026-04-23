@@ -1,5 +1,5 @@
 import ChessBackground from "./ChessBackground";
-import { useState} from "react";
+import { useState, useRef, useEffect} from "react";
 import { Link, useNavigate } from "react-router";
 import {
   ArrowRight,
@@ -59,6 +59,37 @@ export function Home() {
   const [targetCompaniesInput, setTargetCompaniesInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const companies = ["Google", "Amazon", "Meta", "Apple", "Microsoft", "Stripe",
+                             "OpenAI", "Nvidia", "Adobe", "Palantir", "Netflix", "Uber",
+                             "Airbnb", "Oracle", "Salesforce"];
+  const [companyText, setCompanyText] = useState("");
+  const [companyIndex, setCompanyIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const current = companies[companyIndex];
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        setCompanyText(current.slice(0, companyText.length + 1));
+        if (companyText.length + 1 === current.length) {
+          setTimeout(() => setIsDeleting(true), 1500);
+        }
+      } else {
+        setCompanyText(current.slice(0, companyText.length - 1));
+        if (companyText.length - 1 === 0) {
+          setIsDeleting(false);
+          setCompanyIndex((i) => (i + 1) % companies.length);
+        }
+      }
+    }, isDeleting ? 80 : 140);
+    return () => clearTimeout(timeout);
+  }, [companyText, isDeleting, companyIndex]);
+
+  const style = `
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    .cursor-blink { animation: blink 0.8s step-end infinite; }
+  `;
 
   const targetCompanies = targetCompaniesInput
     .split(",")
@@ -125,7 +156,10 @@ export function Home() {
 
           <div className="text-center mb-12">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-stone-900 mb-4">
-              Checkmate Your Interview
+              Checkmate Your Interview at{" "}
+              <span className="text-emerald-900">{companyText}</span>
+              <style>{style}</style>
+              <span className="cursor-blink text-emerald-700">|</span>
             </h1>
             <p className="text-lg sm:text-xl text-stone-600 max-w-2xl mx-auto">
               Build a board-winning prep plan with opening moves, tactical
