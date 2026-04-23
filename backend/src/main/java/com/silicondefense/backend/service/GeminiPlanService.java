@@ -230,30 +230,109 @@ public class GeminiPlanService {
             List<String> strengths,
             List<String> weaknesses,
             List<String> neutralTopics
-        ) {
+    ) {
         String userName = (fullName == null || fullName.isBlank()) ? "Candidate" : fullName.trim();
-        String companyContext = targetCompanies.isEmpty() ? "No explicit company targets provided" : String.join(", ", targetCompanies);
-        String strengthsContext = strengths.isEmpty() ? "No explicit strengths selected" : String.join(", ", strengths);
-        String weaknessesContext = weaknesses.isEmpty() ? "No explicit weaknesses selected" : String.join(", ", weaknesses);
-        String neutralContext = neutralTopics.isEmpty() ? "No explicit neutral topics selected" : String.join(", ", neutralTopics);
+        String companyContext = targetCompanies.isEmpty()
+                ? "top tech companies (Google, Meta, Amazon, Microsoft)"
+                : String.join(", ", targetCompanies);
+        String strengthsContext = strengths.isEmpty() ? "none provided" : String.join(", ", strengths);
+        String weaknessesContext = weaknesses.isEmpty() ? "none provided" : String.join(", ", weaknesses);
+        String neutralContext = neutralTopics.isEmpty() ? "none provided" : String.join(", ", neutralTopics);
 
-        return "Generate a realistic interview preparation plan in strict JSON. " +
-            "User id: " + userId + ". " +
-            "User name: " + userName + ". " +
-                "Interview type: " + interviewType + ". " +
-                "Timeframe: " + timeframe + ". " +
-            "Target companies: " + companyContext + ". " +
-            "User strengths: " + strengthsContext + ". " +
-            "User weaknesses: " + weaknessesContext + ". " +
-            "User neutral topics: " + neutralContext + ". " +
-                "Return ONLY JSON with schema: {\"phases\":[{\"id\":string,\"title\":string,\"description\":string,\"duration\":string,\"topics\":[string]}]," +
-                "\"schedule\":[{\"day\":number,\"date\":string,\"tasks\":[{\"id\":string,\"title\":string,\"duration\":string,\"type\":\"study\"|\"practice\"|\"review\"|\"mock\"}]}]," +
-                "\"questions\":[{\"id\":string,\"question\":string,\"category\":string,\"difficulty\":\"easy\"|\"medium\"|\"hard\",\"tips\":[string]}]}. " +
-            "Schedule and questions must be personalized to this user profile, strengths, weaknesses, and target companies. " +
-            "Weaknesses are the primary focus: at least 70% of study/practice tasks and at least 70% of questions must target weaknesses when weaknesses are provided. " +
-            "Strength topics should be ignored or only briefly covered (at most one short checkpoint in the full plan). " +
-            "Neutral topics should be included based on their importance to the selected interview type. " +
-            "Create company-specific questions and plan topics when target companies are provided.";
+        int totalDays = switch (timeframe) {
+            case "1week"   -> 7;
+            case "2weeks"  -> 14;
+            case "1month"  -> 30;
+            case "2months" -> 60;
+            default        -> 14;
+        };
+
+        int totalQuestions = switch (timeframe) {
+            case "1week"   -> 15;
+            case "2weeks"  -> 25;
+            case "1month"  -> 40;
+            case "2months" -> 60;
+            default        -> 25;
+        };
+
+        String interviewGuidance = switch (interviewType) {
+            case "software" -> """
+            Focus on: data structures, algorithms, system design, coding challenges, and object-oriented design.
+            Include LeetCode-style questions, system design exercises (e.g., design a URL shortener, design Twitter),
+            and behavioral questions using the STAR method. Company-specific: include known question patterns
+            and focus areas (e.g., Google focuses on algorithms and scalability, Meta on product-scale systems,
+            Amazon on leadership principles, Microsoft on problem-solving clarity).
+            """;
+            case "product" -> """
+            Focus on: product sense, metrics, case studies, prioritization frameworks, and go-to-market strategy.
+            Include questions like "How would you improve X product?", "How do you define success for feature Y?",
+            and estimation questions. Company-specific: tailor to each company's product culture
+            (e.g., Meta focuses on social impact and growth, Google on data-driven decisions,
+            Amazon on customer obsession and working backwards).
+            """;
+            case "behavioral" -> """
+            Focus on: leadership, conflict resolution, teamwork, failure/success stories, and situational judgment.
+            Use STAR method (Situation, Task, Action, Result) for all questions.
+            Include company-specific values (e.g., Amazon's 16 Leadership Principles, Google's Googleyness,
+            Meta's Move Fast culture). Include questions about handling ambiguity, cross-functional collaboration,
+            and driving impact.
+            """;
+            case "general" -> """
+            Focus on: resume walkthroughs, common interview questions, salary negotiation, networking,
+            and professional storytelling. Include questions like "Tell me about yourself",
+            "Where do you see yourself in 5 years?", and "Why do you want to work here?".
+            Provide practical tips for each question.
+            """;
+            default -> "Focus on general interview preparation best practices.";
+        };
+
+        return String.format("""
+        You are an expert interview coach helping %s prepare for %s interviews at %s.
+
+        Preparation timeframe: %s (%d days total).
+
+        Candidate profile:
+        - Strengths: %s
+        - Weaknesses: %s
+        - Neutral topics: %s
+
+        Interview focus guidance:
+        %s
+
+        Generate a highly personalized, realistic, and actionable interview preparation plan.
+
+        Requirements:
+        - Create exactly 4 phases that progressively build skill (Foundation → Focused Practice → Company-Specific → Final Polish)
+        - Generate exactly %d days of schedule entries (day 1 through day %d), each with 2-3 specific tasks
+        - Generate exactly %d practice questions, mixing difficulties: 40%% easy, 40%% medium, 20%% hard
+        - Every question must include 3 specific, actionable tips
+        - Tasks should be specific and actionable (not generic like "study algorithms" but "solve 3 LeetCode medium array problems focusing on sliding window technique")
+        - Questions must be real, specific interview questions — not placeholders
+        - When target companies are provided, include company-specific questions and topics
+        - Include mock interview days every 5-7 days and weekly review sessions
+        - Schedule should have realistic time estimates (30-120 min per task)
+        - Task types must be one of: study, practice, review, mock
+
+        Personalization rules based on candidate profile:
+        - Weaknesses are the PRIMARY focus: at least 70%% of study/practice tasks and 70%% of questions must target weakness areas when weaknesses are provided
+        - Strengths should only appear as a brief checkpoint (at most once in the full plan) — do not waste prep time on what the candidate already knows
+        - Neutral topics should be included proportionally based on their importance to the %s interview type
+        - If no strengths/weaknesses are provided, distribute topics evenly across the interview type
+
+        Return ONLY valid JSON with this exact schema — no markdown, no explanation, no extra text:
+        {
+          "phases": [{"id": string, "title": string, "description": string, "duration": string, "topics": [string]}],
+          "schedule": [{"day": number, "date": string, "tasks": [{"id": string, "title": string, "duration": string, "type": "study"|"practice"|"review"|"mock"}]}],
+          "questions": [{"id": string, "phaseId": string, "question": string, "category": string, "difficulty": "easy"|"medium"|"hard", "tips": [string]}]        }
+        """,
+                userName, interviewType, companyContext,
+                timeframe, totalDays,
+                strengthsContext, weaknessesContext, neutralContext,
+                interviewGuidance,
+                totalDays, totalDays,
+                totalQuestions,
+                interviewType
+        );
     }
 
     public static class PlanData {
