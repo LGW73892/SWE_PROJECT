@@ -195,27 +195,101 @@ public class GeminiPlanService {
         return text.substring(start, end + 1);
     }
 
-        private String buildPrompt(
+    private String buildPrompt(
             String userId,
             String fullName,
             String interviewType,
             String timeframe,
             List<String> targetCompanies
-        ) {
+    ) {
         String userName = (fullName == null || fullName.isBlank()) ? "Candidate" : fullName.trim();
-        String companyContext = targetCompanies.isEmpty() ? "No explicit company targets provided" : String.join(", ", targetCompanies);
+        String companyContext = targetCompanies.isEmpty()
+                ? "top tech companies (Google, Meta, Amazon, Microsoft)"
+                : String.join(", ", targetCompanies);
 
-        return "Generate a realistic interview preparation plan in strict JSON. " +
-            "User id: " + userId + ". " +
-            "User name: " + userName + ". " +
-                "Interview type: " + interviewType + ". " +
-                "Timeframe: " + timeframe + ". " +
-            "Target companies: " + companyContext + ". " +
-                "Return ONLY JSON with schema: {\"phases\":[{\"id\":string,\"title\":string,\"description\":string,\"duration\":string,\"topics\":[string]}]," +
-                "\"schedule\":[{\"day\":number,\"date\":string,\"tasks\":[{\"id\":string,\"title\":string,\"duration\":string,\"type\":\"study\"|\"practice\"|\"review\"|\"mock\"}]}]," +
-                "\"questions\":[{\"id\":string,\"question\":string,\"category\":string,\"difficulty\":\"easy\"|\"medium\"|\"hard\",\"tips\":[string]}]}. " +
-            "Schedule and questions must be personalized to this user profile and target companies. " +
-            "Create company-specific questions and plan topics when target companies are provided.";
+        int totalDays = switch (timeframe) {
+            case "1week"  -> 7;
+            case "2weeks" -> 14;
+            case "1month" -> 30;
+            case "2months"-> 60;
+            default       -> 14;
+        };
+
+        int totalQuestions = switch (timeframe) {
+            case "1week"  -> 15;
+            case "2weeks" -> 25;
+            case "1month" -> 40;
+            case "2months"-> 60;
+            default       -> 25;
+        };
+
+        String interviewGuidance = switch (interviewType) {
+            case "software" -> """
+            Focus on: data structures, algorithms, system design, coding challenges, and object-oriented design.
+            Include LeetCode-style questions, system design exercises (e.g., design a URL shortener, design Twitter),
+            and behavioral questions using the STAR method. Company-specific: include known question patterns
+            and focus areas (e.g., Google focuses on algorithms and scalability, Meta on product-scale systems,
+            Amazon on leadership principles, Microsoft on problem-solving clarity).
+            """;
+            case "product" -> """
+            Focus on: product sense, metrics, case studies, prioritization frameworks, and go-to-market strategy.
+            Include questions like "How would you improve X product?", "How do you define success for feature Y?",
+            and estimation questions. Company-specific: tailor to each company's product culture
+            (e.g., Meta focuses on social impact and growth, Google on data-driven decisions,
+            Amazon on customer obsession and working backwards).
+            """;
+            case "behavioral" -> """
+            Focus on: leadership, conflict resolution, teamwork, failure/success stories, and situational judgment.
+            Use STAR method (Situation, Task, Action, Result) for all questions.
+            Include company-specific values (e.g., Amazon's 16 Leadership Principles, Google's Googleyness,
+            Meta's Move Fast culture). Include questions about handling ambiguity, cross-functional collaboration,
+            and driving impact.
+            """;
+            case "general" -> """
+            Focus on: resume walkthroughs, common interview questions, salary negotiation, networking,
+            and professional storytelling. Include questions like "Tell me about yourself",
+            "Where do you see yourself in 5 years?", and "Why do you want to work here?".
+            Provide practical tips for each question.
+            """;
+            default -> "Focus on general interview preparation best practices.";
+        };
+
+        return String.format("""
+        You are an expert interview coach helping %s prepare for %s interviews at %s.
+        
+        Preparation timeframe: %s (%d days total).
+        
+        Interview focus guidance:
+        %s
+        
+        Generate a highly personalized, realistic, and actionable interview preparation plan.
+        
+        Requirements:
+        - Create exactly 4 phases that progressively build skill (Foundation → Focused Practice → Company-Specific → Final Polish)
+        - Generate exactly %d days of schedule entries (day 1 through day %d), each with 2-3 specific tasks
+        - Generate exactly %d practice questions, mixing difficulties: 40%% easy, 40%% medium, 20%% hard
+        - Every question must include 3 specific, actionable tips
+        - Tasks should be specific and actionable (not generic like "study algorithms" but "solve 3 LeetCode medium array problems focusing on sliding window technique")
+        - Questions must be real, specific interview questions — not placeholders
+        - When target companies are provided, include company-specific questions and topics (e.g., actual known interview questions from those companies)
+        - Include mock interview days every 5-7 days
+        - Include weekly review sessions
+        - Schedule should have realistic time estimates (30-120 min per task)
+        - Task types must be one of: study, practice, review, mock
+        
+        Return ONLY valid JSON with this exact schema — no markdown, no explanation, no extra text:
+        {
+          "phases": [{"id": string, "title": string, "description": string, "duration": string, "topics": [string]}],
+          "schedule": [{"day": number, "date": string, "tasks": [{"id": string, "title": string, "duration": string, "type": "study"|"practice"|"review"|"mock"}]}],
+          "questions": [{"id": string, "question": string, "category": string, "difficulty": "easy"|"medium"|"hard", "tips": [string]}]
+        }
+        """,
+                userName, interviewType, companyContext,
+                timeframe, totalDays,
+                interviewGuidance,
+                totalDays, totalDays,
+                totalQuestions
+        );
     }
 
     private PlanData fallbackPlan(String interviewType, String timeframe, List<String> targetCompanies) {
