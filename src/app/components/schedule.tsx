@@ -196,14 +196,19 @@ export function Schedule() {
       </div>
 
       {/* Chess Campaign Progress */}
-      <div className="bg-white rounded-lg p-6 mb-8 shadow-sm border">
+      <div className="rounded-2xl border border-emerald-900/10 bg-[#fffaf0]/90 p-6 mb-8 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-stone-900">
             Road to Checkmate
           </h2>
-          <span className="rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-900">
-            {completionRate}% complete
-          </span>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-900">
+              Completed: {completedTasks}/{totalTasks}
+            </span>
+            <span className="rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-900">
+              {completionRate}% complete
+            </span>
+          </div>
         </div>
         {showCheckmateBanner && (
           <div className="mb-4 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-900">
@@ -212,7 +217,7 @@ export function Schedule() {
         )}
 
         <div className="relative mb-8 h-10 px-1">
-          <div className="absolute left-1 right-1 top-1/2 h-3 -translate-y-1/2 rounded-full bg-gray-200" />
+          <div className="absolute left-1 right-1 top-1/2 h-3 -translate-y-1/2 rounded-full bg-amber-100" />
           <div
             className="absolute left-1 top-1/2 h-3 -translate-y-1/2 rounded-full bg-emerald-700 transition-all duration-500"
             style={{ width: `${completionRate}%` }}
@@ -251,7 +256,7 @@ export function Schedule() {
                     } ${
                       isCaptured
                         ? "border-emerald-800 bg-emerald-800 text-[#fffaf0]"
-                        : "border-gray-400 bg-white text-gray-600"
+                        : "border-emerald-900/20 bg-white text-stone-600"
                     }`}
                   >
                     <span className="leading-none">{pieceIcon}</span>
@@ -282,16 +287,16 @@ export function Schedule() {
                     ? "border-emerald-200 bg-emerald-50"
                     : isCurrent
                       ? "border-amber-200 bg-amber-50"
-                      : "border-gray-200 bg-gray-50"
+                      : "border-emerald-900/10 bg-white/80"
                 }`}
               >
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="text-sm font-semibold text-stone-900">
                   <span className="mr-2" aria-hidden>
                     {pieceIcons[phase.piece] ?? "♟"}
                   </span>
                   {phase.title}
                 </p>
-                <p className="mt-1 text-xs text-gray-600">
+                <p className="mt-1 text-xs text-stone-600">
                   {isCompleted
                     ? "Captured"
                     : isCurrent
@@ -302,7 +307,7 @@ export function Schedule() {
                   className={`mt-2 inline-flex items-center gap-2 rounded-full border px-2 py-1 text-[11px] font-medium ${
                     pawnReached
                       ? "border-emerald-300 bg-emerald-100 text-emerald-900"
-                      : "border-gray-300 bg-white text-gray-600"
+                      : "border-emerald-900/20 bg-white text-stone-600"
                   }`}
                   title="Middle checkpoint of this phase"
                   aria-label="Middle checkpoint pawn status"
@@ -313,36 +318,6 @@ export function Schedule() {
               </div>
             );
           })}
-        </div>
-      </div>
-
-      {/* Progress Summary */}
-      <div className="rounded-2xl border border-emerald-900/10 bg-[#fffaf0]/90 p-6 mb-8 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
-          <div>
-            <div className="text-sm text-stone-600 mb-1">Total Tasks</div>
-            <div className="text-2xl font-bold text-stone-900">
-              {totalTasks}
-            </div>
-          </div>
-          <div>
-            <div className="text-sm text-stone-600 mb-1">Completed</div>
-            <div className="text-2xl font-bold text-green-600">
-              {completedTasks}
-            </div>
-          </div>
-          <div>
-            <div className="text-sm text-stone-600 mb-1">Progress</div>
-            <div className="text-2xl font-bold text-emerald-900">
-              {completionRate}%
-            </div>
-          </div>
-        </div>
-        <div className="w-full bg-amber-100 rounded-full h-3">
-          <div
-            className="bg-emerald-900 h-3 rounded-full transition-all duration-300"
-            style={{ width: `${completionRate}%` }}
-          />
         </div>
       </div>
 
@@ -391,7 +366,7 @@ export function Schedule() {
                         className={`inline-flex h-6 w-6 items-center justify-center rounded-full border text-sm transition-colors ${
                           completedTaskIds.has(task.id)
                             ? "border-emerald-700 bg-emerald-100 text-emerald-700"
-                            : "border-gray-300 bg-white text-gray-400"
+                            : "border-emerald-900/20 bg-white text-stone-400"
                         }`}
                         aria-hidden
                       >

@@ -77,7 +77,7 @@ export function Root() {
   return (
     <div className="size-full flex flex-col">
       {/* Header */}
-      <header className="-b bordborderer-emerald-900/15 relative z-50 bg-[#fffaf0]/95 backdrop-blur supports-[backdrop-filter]:bg-[#fffaf0]/80 shadow-[0_2px_24px_rgba(31,77,58,0.06)]">
+      <header className="border-b border-emerald-900/15 relative z-50 bg-[#fffaf0]/95 backdrop-blur supports-[backdrop-filter]:bg-[#fffaf0]/80 shadow-[0_2px_24px_rgba(31,77,58,0.06)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-3">

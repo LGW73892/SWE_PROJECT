@@ -38,7 +38,7 @@ export function Auth() {
 
   return (
     <div className="mx-auto max-w-xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="rounded-2xl border border-emerald-900/10 bg-white/90 p-8 shadow-sm">
+      <div className="rounded-2xl border border-emerald-900/10 bg-[#fffaf0]/90 p-8 shadow-sm">
         <h1 className="mb-2 text-3xl font-bold text-stone-900">
           Account Access
         </h1>
@@ -70,7 +70,7 @@ export function Auth() {
                 Full Name
               </label>
               <input
-                className="w-full rounded-lg border border-emerald-900/20 bg-white px-3 py-2"
+                className="w-full rounded-lg border border-emerald-900/20 bg-white/90 px-3 py-2"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Ada Lovelace"
@@ -83,7 +83,7 @@ export function Auth() {
               Email
             </label>
             <input
-              className="w-full rounded-lg border border-emerald-900/20 bg-white px-3 py-2"
+              className="w-full rounded-lg border border-emerald-900/20 bg-white/90 px-3 py-2"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -96,7 +96,7 @@ export function Auth() {
               Password
             </label>
             <input
-              className="w-full rounded-lg border border-emerald-900/20 bg-white px-3 py-2"
+              className="w-full rounded-lg border border-emerald-900/20 bg-white/90 px-3 py-2"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
